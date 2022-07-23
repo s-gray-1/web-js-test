@@ -1,0 +1,117 @@
+<style>
+  .red{
+    color: red;
+  }
+  .green {
+    color: green;
+  }
+</style>
+<div id="app"></div>
+<script>
+  // h 生成 vdom，将 vdom 挂载到真实 dom 上
+  function h(tag,props,children){
+    return {
+      tag,
+      props,
+      children
+    }
+  }
+  function mount(vnode,container){
+    const el = vnode.el = document.createElement(vnode.tag)
+    // props
+    if(vnode.props){
+      for(const key in vnode.props){
+        const value = vnode.props[key]
+        el.setAttribute(key,value)
+      }
+    }
+    // children
+    if(vnode.children){
+      if(typeof vnode.children ==='string'){
+        el.textContent = vnode.children
+      }else{
+        vnode.children.forEach(child=>{
+          mount(child,el)
+        })
+      }
+    }
+    container.appendChild(el)
+  }
+  const vdom = h('div',{class:'red'},[
+    h('span',null,'hello')
+  ])
+  mount(vdom,document.getElementById('app'))
+  
+  function patch(n1,n2){
+  //  如果两个node是相同类型的
+    if(n1.tag === n2.tag){
+      // 拿到旧的节点的DOM
+      const el = n2.el = n1.el
+      // props
+      const oldProps = n1.props || {}
+      const newProps = n2.props || {}
+      // 遍历新的属性 如果和旧的属性不相等，那么就设置新的属性
+      for(const key in newProps){
+        const oldValue = oldProps[key]
+        const newValue = newProps[key]
+        if(newValue!==oldValue){
+          el.setAttribute(key,newValue)
+        }
+      }
+      // 遍历旧的属性 如果新的属性没有这一项 则删除旧的属性
+      for(const key in oldProps){
+        if(!(key in newProps)){
+          el.removeAttribute(key)
+        }
+      }
+      // children 比较孩子
+      const oldChildren=n1.children
+      const newChildren =n2.children
+      if(typeof newChildren ==='string'){
+        if(typeof oldChildren === 'string'){
+          // 新的孩子和旧的孩子都是string类型 即都是文本类型
+          if(newChildren!==oldChildren){
+            // 直接替换textcontent
+            el.textContent=newChildren
+          }
+        }else{
+             // 新孩子是文本节点，但是旧孩子是数组，直接设置 textContent，
+            // 这样会覆盖旧的子 DOM 节点，并丢弃它们
+            el.textContent = newChildren
+        }
+      }else{
+          // 新孩子和旧孩子都为数组
+          // diff 阶段
+          // diff 在 Vue 内部有两种方式，一种是通过 key，一种是遍历比较
+          // 这里直接遍历
+          // 获取共有的长度，直接每个子节点都进行 patch
+          // 这样可能非常低效，但是足够直观并且能保证一致性
+        const commonLength = Math.min(oldChildren.length,newChildren.length)
+        for(let i=0;i<commonLength;i++){
+          patch(oldChildren[i],newChildren[i])
+        }
+        if(newChildren.length>oldChildren.length){
+           // 如果新孩子更长，将新孩子多余的节点添加到 DOM 上
+          newChildren.slice(oldChildren.length).forEach(child=>{
+            mount(child,el)
+          })
+        }else if(oldChildren.length>newChildren.length){
+          // 如果旧孩子更长，将旧孩子多余的节点从 DOM 上移除
+          oldChildren.slice(newChildren.length).forEach(child=>{
+            el.removeChild(chil.el)
+          })
+
+        }
+      }
+
+    }else{
+      // 如果两个 node 是不同类型的，则需要用新的 node 替换 旧的 node
+        // 这里省略
+        // replace
+    }
+  }
+  const vdom2 = h('div',{class:'green'},[
+    h('span',null,'changed')
+  ])
+  patch(vdom,vdom2)
+</script>

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <script>
+    // let k="5"
+/*   Number String Boolean null undefined Symbol bigint */
+// 手写intanceOf
+/* function instance_of(l_value,r_value){
+  let r_prototype=r_value.prototype
+  l_value=l_value.__proto__
+  while(true){
+    if(l_value===null){
+      return false
+    }
+    if(l_value===r_prototype){
+      return true
+    }
+    l_value=l_value.__proto__
+  }
+}
+var a = []
+var b = {}
+
+function Foo(){}
+var c = new Foo()
+function child(){}
+function father(){}
+child.prototype = new father() 
+var d = new child()
+
+console.log(instance_of(a, Array)) // true
+console.log(instance_of(b, Object)) // true
+console.log(instance_of(b, Array)) // false
+console.log(instance_of(a, Object)) // true
+console.log(instance_of(c, Foo)) // true
+console.log(instance_of(d, child)) // true
+console.log(instance_of(d, father)) // true
+function unique(arr){
+  return Array.from(new Set(arr))
+}
+var arr = [1,1,'true','true',true,true,15,15,false,false, undefined,undefined, null,null, NaN, NaN,'NaN', 0, 0, 'a', 'a',{},{}];
+console.log(unique(arr));
+const promise=new Promise((resolve,reject)=>{
+  
+}) */
+var findRepeatNumber = function(nums) {
+    var curent=[]
+    var t=0
+    nums=nums.sort()
+    for(var i=1;i<nums.length;i++){
+      if(nums[i]===nums[i-1]){
+       return nums[i]
+      }
+    }
+  
+   
+};
+var findRepeatNumber = function(nums){
+    let map = new Map();
+    for(var i=0;i<nums.length;i++){
+        if(map.get(nums[i])){
+            return nums[i];
+        }
+        else{
+            map.set(nums[i], 1);
+        }
+    }
+    return -1;
+}
+
+var arr=[2, 3, 1,2,3, 0, 2, 5, 3]
+console.log(findRepeatNumber(arr))
+</script>
+</body>
+</html>

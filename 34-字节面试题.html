@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Document</title>
+</head>
+<script>
+	function Foo(){
+		getName=function(){
+			console.log(1);
+		}
+		return this
+	}
+	Foo.getName=function(){	console.log(2)}
+	Foo.prototype.getName=function(){	console.log(3)}
+	var getName=function(){	console.log(4)}
+	function getName(){	console.log(5)}
+	
+/* 	
+	function Foo(){
+		getName=function(){
+				console.log(1);
+			}
+		return this
+	}
+	var getName; 变量提升
+	// function getName(){	console.log(5)} 被下面的  4给替代了
+	Foo.getName=function(){	console.log(2)}
+	Foo.prototype.getName=function(){	console.log(3)}
+	getName=function(){	console.log(4)}
+	
+	*/
+	
+	
+	Foo.getName() //2
+	getName() //4
+	Foo().getName() //1
+	getName() //1
+	new Foo.getName() // 2
+	new Foo().getName() //3 (new Foo()).getName() foo.getName() ==>实例对象自身没有getName() 向构造函数Foo的原型对象查找
+	new new Foo().getName() //3 new ((new Foo()).getName())()=>new (foo.getName)()=>new (function () { alert(3); };)() 
+</script>
+<body>
+	
+</body>
+</html>

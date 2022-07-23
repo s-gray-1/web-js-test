@@ -1,0 +1,62 @@
+<script src="https://unpkg.com/vue"></script>
+<div id="app"></div>
+<script>
+  const {createApp,ref,watchEffect}=Vue
+  function usePost(getId){
+    return useFetch(() => `https://jsonplaceholder.typicode.com/todos/${getId()}`)
+  }
+  function useFetch(getUrl){
+    const data=ref(null)
+    const error=ref(null)
+    const isPending=ref(true)
+    watchEffect(()=>{
+      data.value=null
+      error.value=null
+      isPending.value=true
+      fetch(getUrl()).then(res=>res.json()).then(res=>{
+        data.value=res
+      }).catch(err=>{
+        error.value=err
+      }).finally(()=>{
+        isPending.value=false
+      })
+
+
+    })
+    return {
+      data,
+      error,
+      isPending
+    }
+  }
+  const Post={
+    template:`
+    <div v-if="isPending">loading</div>
+    <div v-else-if="data">{{data}}</div>
+    <div v-else-if="error">运行错误{{error.message}}</div>
+    `,
+    props:['id'],
+    setup(props) {
+      const {data,error,isPending} = usePost(()=>props.id)
+      return {
+        data,
+        error,
+        isPending
+      }
+    }
+   
+  }
+  const App={
+    components:{Post},
+    data() {
+      return {
+        id:1
+      }
+    },
+    template:`
+    <button @click='this.id++'>改变ID</button>
+    <Post :id='id'></Post>`
+  }
+  
+createApp(App).mount("#app")
+</script>

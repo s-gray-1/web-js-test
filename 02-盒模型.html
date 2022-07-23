@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    .box {
+      width: 200px;
+      border: 1px solid #000;
+      margin: 10px;
+      padding: 10px;
+      box-sizing: content-box;
+      /* 
+      box-sizing: content-box;默认 盒子宽度=width+2*padding+2*border=222
+      box-sizing: border-box; 盒子宽度=200 内容区域是200-2*border-2*padding=178
+      document.querySelector(".box").offsetWidth */
+    }
+  </style>
+</head>
+<body>
+  <div class="box">
+    hello from box
+  </div>
+</body>
+</html>

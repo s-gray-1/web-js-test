@@ -1,0 +1,111 @@
+<script>
+  // 记录当前的 effect
+  let activeEffect;
+  // 创建一个 Dep 类
+  class Dep {
+      // 构造的时候，记录 effect 到 subscribers 集合中
+      // 这里直接把值记录在 Dep 中
+      subscribers = new Set();
+      // 将当前的 effect 放入 subscribers 集合
+      // 使用集合可以避免重复收集依赖
+      depend() {
+          if (activeEffect) {
+              this.subscribers.add(activeEffect);
+          }
+      }
+
+      // 更新的时候，把集合里的 effect 都执行一遍
+      notify() {
+          this.subscribers.forEach(effect => {
+              effect()
+          });
+      }
+  }
+  // 把传入进来的回调函数设置成当前的 effect
+  // 然后立马执行一遍回调函数
+  // 执行完后清空当前的 effect
+  function watchEffect(effect) {
+      activeEffect = effect;
+      effect();
+      activeEffect = null;
+  }
+  // Vue 2 采用 Object.defineProperty 为对象上的每一个 key 添加响应式
+  // 这样做的缺点就是新增的属性无法自动添加响应式
+/* function reactive(raw){
+     Object.keys(raw).forEach(key=>{
+       const dep=new Dep()
+       let value=raw[key]
+
+       Object.defineProperty(raw,key,{
+        get(){
+          // 获取 key 对应的值时添加依赖
+          dep.depend()
+          return value
+        },
+        set(newValue){
+          // 设置 key 对应的值时进行更新
+           value=newValue
+           dep.notify()
+        }
+       })
+     })
+     return raw
+  } */
+  // Vue3 Proxy
+  // Vue 2采用 Object.defineProperty，对每一个 key 做响应式处理，而 Vue 3 使用 Proxy，
+  // 是直接对整个对象本身做响应式处理，这样的好处就是新添加的属性，也可以被自动处理，并且使用 Proxy 可以直接处理数组，
+  // 而不是像 Vue 2，针对数组特殊处理，修改数组的原型链，这种比较 hack 的方式进行处理。
+  
+    // 创建一个存放 deps 的弱引用 Map，key 为 target 本身
+    // 即需要响应式处理的对象本身
+    // WeakMap 只能用 object 作为 key，并且无法被遍历
+    // 当 target 不再需要的时候，可以正确地被垃圾处理机制回收
+  const targetMap = new WeakMap()
+  function getDep(target,key){
+     // 获取 target 对应的 deps，不存在就创建
+    let depsMap=targetMap.get(target)
+    if(!depsMap){
+      depsMap=new Map()
+      targetMap.set(target,depsMap)
+    }
+     // 获取 target[key] 对应的 dep，不存在就创建
+    let dep=depsMap.get(key)
+    if(!dep){
+      dep=new Dep()
+      depsMap.set(key,dep)
+    }
+    return dep
+  }
+  const reactiveHandlers={
+    get(target,key,receiver){
+        // 因为 get 和 set 里都需要获取 dep，故抽成一个获取 dep 的函数
+      const dep =getDep(target,key)
+       // 收集依赖
+      dep.depend()
+  // 使用 Reflect 确保与原始的 get 一致
+      return Reflect.get(target,key,receiver)
+    },
+    set(target,key,value,receiver){
+      const dep =getDep(target,key)
+      // Proxy 的 set 需要返回一个值
+      const result = Reflect.set(target,key,value,receiver)
+   // 通知更新
+      dep.notify()
+      return result
+    }
+  }
+  function reactive(raw){
+    // 使用 Proxy，更方便地拦截处理
+    const p = new Proxy(raw,reactiveHandlers)
+    return p
+  }
+  const state = reactive({
+    count:0
+  })
+  watchEffect(() => {
+     console.log(state.message);
+  }) //0
+  state.count+=2;//1
+  state.message='hello'
+
+</script>
